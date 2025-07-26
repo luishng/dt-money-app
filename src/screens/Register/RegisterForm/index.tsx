@@ -49,6 +49,7 @@ export const RegisterForm = () => {
         leftIconName="mail-outline"
         label="EMAIL"
         placeholder="mail@example.br"
+        keyboardType="email-address"
       />
 
       <AppInput

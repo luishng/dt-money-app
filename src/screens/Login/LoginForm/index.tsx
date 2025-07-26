@@ -37,6 +37,7 @@ export const LoginForm = () => {
         label="EMAIL"
         placeholder="mail@example.com"
         leftIconName="mail-outline"
+        keyboardType="email-address"
       />
 
       <AppInput
