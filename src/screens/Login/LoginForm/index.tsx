@@ -1,19 +1,18 @@
-import { AppInput } from "@/components/AppInput"
-import { useForm } from "react-hook-form"
+import { AppButton } from "@/components/AppButton";
+import { AppInput } from "@/components/AppInput";
+import { useForm } from "react-hook-form";
 
 export interface FormLoginParams {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export const LoginForm = () => {
   const {
     control,
     handleSubmit,
-    formState: {
-      isSubmitting
-    }
-  } = useForm<FormLoginParams>()
+    formState: { isSubmitting },
+  } = useForm<FormLoginParams>();
 
   return (
     <>
@@ -25,7 +24,6 @@ export const LoginForm = () => {
         leftIconName="mail-outline"
       />
 
-
       <AppInput
         control={control}
         name="password"
@@ -34,6 +32,10 @@ export const LoginForm = () => {
         leftIconName="lock-outline"
         secureTextEntry
       />
+
+      <AppButton iconName="arrow-forward" mode="outline">
+        Login
+      </AppButton>
     </>
-  )
-}
+  );
+};
