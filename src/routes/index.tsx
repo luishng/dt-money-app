@@ -1,25 +1,26 @@
-import { NavigationContainer } from "@react-navigation/native"
+import { NavigationContainer } from "@react-navigation/native";
 
-import { PublicRoutes } from "./PublicRoutes"
-import { PrivateRoutes } from "./PrivateRoutes"
-import { useCallback, useState } from "react"
+import { PublicRoutes } from "./PublicRoutes";
+import { PrivateRoutes } from "./PrivateRoutes";
+import { useCallback, useState } from "react";
+import { useAuth } from "@/context/auth.context";
 
 const NavigationRoutes = () => {
-  const [user, setUser] = useState(undefined)
+  const { user, token } = useAuth();
 
   const Routes = useCallback(() => {
-    if (!user) {
-      return <PublicRoutes />
+    if (!user || !token) {
+      return <PublicRoutes />;
     } else {
-      return <PrivateRoutes />
+      return <PrivateRoutes />;
     }
-  }, [user])
+  }, [user, token]);
 
   return (
     <NavigationContainer>
       <Routes />
     </NavigationContainer>
-  )
-}
+  );
+};
 
-export default NavigationRoutes
+export default NavigationRoutes;
