@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { schema } from "./schema";
 import { useAuth } from "@/context/auth.context";
 import { AxiosError } from "axios";
+import { useErrorHandler } from "@/shared/hooks/useErrorHandler";
 
 export interface FormRegisterParams {
   email: string;
@@ -32,6 +33,7 @@ export const RegisterForm = () => {
   });
 
   const { handleRegister } = useAuth();
+  const { handleError } = useErrorHandler();
 
   const navigation = useNavigation<NavigationProp<PublicStackParamsList>>();
 
@@ -39,9 +41,7 @@ export const RegisterForm = () => {
     try {
       await handleRegister(userData);
     } catch (error) {
-      if (error instanceof AxiosError) {
-        console.error(error.response?.data);
-      }
+      handleError(error, "Falha ao cadastrar usuário");
     }
   };
 

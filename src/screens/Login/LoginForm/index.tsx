@@ -9,6 +9,7 @@ import { schema } from "./schema";
 import { useAuth } from "@/context/auth.context";
 import { useSnackbarContext } from "@/context/snackbar.context";
 import { AppError } from "@/shared/helpers/AppError";
+import { useErrorHandler } from "@/shared/hooks/useErrorHandler";
 
 export interface FormLoginParams {
   email: string;
@@ -29,7 +30,7 @@ export const LoginForm = () => {
   });
 
   const { handleAuthenticate } = useAuth();
-  const { notify } = useSnackbarContext();
+  const { handleError } = useErrorHandler();
 
   const navigation = useNavigation<NavigationProp<PublicStackParamsList>>();
 
@@ -37,12 +38,7 @@ export const LoginForm = () => {
     try {
       await handleAuthenticate(userData);
     } catch (error) {
-      if (error instanceof AppError) {
-        notify({
-          message: error.message,
-          messageType: "ERROR",
-        });
-      }
+      handleError(error, "Falha ao logar");
     }
   };
 
