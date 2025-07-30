@@ -64,7 +64,11 @@ export const LoginForm = () => {
       />
 
       <View className="flex-1 justify-between mt-8 mb-6 min-h-[250px]">
-        <AppButton onPress={handleSubmit(onSubmit)} iconName="arrow-forward">
+        <AppButton
+          disabled={isSubmitting}
+          onPress={handleSubmit(onSubmit)}
+          iconName="arrow-forward"
+        >
           {isSubmitting ? <ActivityIndicator color={colors.white} /> : "Login"}
         </AppButton>
 
