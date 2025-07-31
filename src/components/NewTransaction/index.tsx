@@ -8,6 +8,12 @@ import { TextInput } from "react-native-gesture-handler";
 import CurrencyInput from "react-native-currency-input";
 import { TransactionTypeSelector } from "../SelectType";
 import { SelectCategoryModal } from "../SelectCategoryModal";
+import { transactionSchema } from "./schema";
+import * as Yup from "yup";
+import { AppButton } from "../AppButton";
+import { ErrorMessage } from "../ErrorMessage";
+
+type ValidationErrosTypes = Record<keyof CreateTrasactionInterface, string>;
 
 export const NewTransaction = () => {
   const { closeBottomSheet } = useBottomSheetContext();
@@ -17,6 +23,28 @@ export const NewTransaction = () => {
     typeId: 0,
     value: 0,
   });
+  const [validationErros, setValidationErros] =
+    useState<ValidationErrosTypes>();
+
+  const handleCreateTransaction = async () => {
+    try {
+      await transactionSchema.validate(transaction, {
+        abortEarly: false,
+      });
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const errors = {} as ValidationErrosTypes;
+
+        error.inner.forEach((err) => {
+          if (err.path) {
+            errors[err.path as keyof CreateTrasactionInterface] = err.message;
+          }
+        });
+
+        setValidationErros(errors);
+      }
+    }
+  };
 
   const setTransactionData = (
     key: keyof CreateTrasactionInterface,
@@ -43,6 +71,9 @@ export const NewTransaction = () => {
           onChangeText={(text) => setTransactionData("description", text)}
           className="text-white text-lg h-[50px] bg-background-primary my-2 rounded-[6] pl-4"
         />
+        {validationErros?.description && (
+          <ErrorMessage>{validationErros.description}</ErrorMessage>
+        )}
         <CurrencyInput
           className="text-white text-lg h-[50px] bg-background-primary my-2 rounded-[6] pl-4"
           value={transaction.value}
@@ -53,6 +84,9 @@ export const NewTransaction = () => {
           minValue={0}
           onChangeValue={(value) => setTransactionData("value", value ?? 0)}
         />
+        {validationErros?.value && (
+          <ErrorMessage>{validationErros.value}</ErrorMessage>
+        )}
 
         <SelectCategoryModal
           selectedCategory={transaction.categoryId}
@@ -61,10 +95,21 @@ export const NewTransaction = () => {
           }
         />
 
+        {validationErros?.categoryId && (
+          <ErrorMessage>{validationErros.categoryId}</ErrorMessage>
+        )}
         <TransactionTypeSelector
           typeId={transaction.typeId}
           setTransactionType={(typeId) => setTransactionData("typeId", typeId)}
         />
+
+        {validationErros?.typeId && (
+          <ErrorMessage>{validationErros.typeId}</ErrorMessage>
+        )}
+
+        <View className="my-4">
+          <AppButton onPress={handleCreateTransaction}>Registrar</AppButton>
+        </View>
       </View>
     </View>
   );
