@@ -1,12 +1,20 @@
 import { AppHeader } from "@/components/AppHeader";
 import { useAuth } from "@/context/auth.context";
-import { useTransaction } from "@/context/transaction.context";
 import { useErrorHandler } from "@/shared/hooks/useErrorHandler";
 import { useEffect } from "react";
-import { FlatList, RefreshControl, Text, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ListHeader } from "./ListHeader";
 import { TransactionCard } from "./TransactionCard";
+import { EmptyList } from "./EmptyList";
+import { colors } from "@/shared/colors";
+import { useTransaction } from "@/context/transaction.context";
 
 export const Home = () => {
   const { handleLogout } = useAuth();
@@ -15,7 +23,7 @@ export const Home = () => {
     fetchTransactions,
     transactions,
     refreshTransactions,
-    loadMoreTrasactions,
+    loadMoreTransactions,
     handleLoadings,
     loadings,
   } = useTransaction();
@@ -61,7 +69,13 @@ export const Home = () => {
         key: "loadMore",
         value: true,
       });
-      await loadMoreTrasactions();
+
+      await new Promise((resolve) => {
+        setTimeout(async () => {
+          await loadMoreTransactions();
+          resolve(null);
+        }, 2000);
+      });
     } catch (error) {
       handleError(error, "Falha ao carregar novas transações");
     } finally {
@@ -104,10 +118,19 @@ export const Home = () => {
         className="bg-background-secondary"
         keyExtractor={({ id }) => `transaction-${id}`}
         data={transactions}
+        ListEmptyComponent={loadings.initial ? null : <EmptyList />}
         ListHeaderComponent={ListHeader}
         renderItem={({ item }) => <TransactionCard transaction={item} />}
         onEndReached={handleLoadMoreTransactions}
         onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          loadings.loadMore ? (
+            <ActivityIndicator
+              color={colors["accent-brand-light"]}
+              size={"large"}
+            />
+          ) : null
+        }
         refreshControl={
           <RefreshControl
             refreshing={loadings.refresh}
