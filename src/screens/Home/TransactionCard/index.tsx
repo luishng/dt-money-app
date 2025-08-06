@@ -24,7 +24,7 @@ export const TransactionCard: FC<Params> = ({ transaction }) => {
         marginBottom: 16,
       }}
       overshootRight={false}
-      renderRightActions={() => <RightAction />}
+      renderRightActions={() => <RightAction transactionId={transaction.id} />}
     >
       <View className="h-[140] bg-background-tertiary rounded-[6] p-6">
         <Text className="text-white text-base">{transaction.description}</Text>
