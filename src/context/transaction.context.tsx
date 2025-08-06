@@ -21,6 +21,8 @@ export type TransactionContextType = {
   fetchTransactions: () => Promise<void>;
   totalTransactions: TotalTransactions;
   transactions: Transaction[];
+  refreshTransactions: () => Promise<void>;
+  loading: boolean;
 };
 
 export const TransactionContext = createContext({} as TransactionContextType);
@@ -28,6 +30,7 @@ export const TransactionContext = createContext({} as TransactionContextType);
 export const TransactionContextProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
+  const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<TransactionCategory[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalTransactions, setTotalTransactions] = useState<TotalTransactions>(
@@ -38,6 +41,18 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
     }
   );
 
+  const refreshTransactions = async () => {
+    setLoading(true);
+    const transactionResponse = await transactionService.getTrasactions({
+      page: 1,
+      perPage: 10,
+    });
+
+    setTransactions(transactionResponse.data);
+    setTotalTransactions(transactionResponse.totalTransactions);
+    setLoading(false);
+  };
+
   const fetchCategories = async () => {
     const categoriesResponse =
       await transactionService.getTransactionCategories();
@@ -47,10 +62,12 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
 
   const createTransaction = async (transaction: CreateTrasactionInterface) => {
     await transactionService.createTrasaction(transaction);
+    await refreshTransactions();
   };
 
   const updateTransaction = async (transaction: UpdateTransactionInterface) => {
     await transactionService.updateTransaction(transaction);
+    await refreshTransactions();
   };
 
   const fetchTransactions = useCallback(async () => {
@@ -66,6 +83,7 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
   return (
     <TransactionContext.Provider
       value={{
+        loading,
         fetchCategories,
         categories,
         transactions,
@@ -73,6 +91,7 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
         updateTransaction,
         fetchTransactions,
         totalTransactions,
+        refreshTransactions,
       }}
     >
       {children}
