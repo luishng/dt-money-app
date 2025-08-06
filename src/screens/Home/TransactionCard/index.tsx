@@ -1,12 +1,13 @@
 import { Transaction } from "@/shared/interfaces/transaction";
 import { FC } from "react";
 import { Text, View } from "react-native";
-import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import { Swipeable } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { colors } from "@/shared/colors";
 import { TransactionTypes } from "@/shared/enums/transaction-types";
 import clsx from "clsx";
+import { RightAction } from "./RightAction";
 
 interface Params {
   transaction: Transaction;
@@ -22,6 +23,8 @@ export const TransactionCard: FC<Params> = ({ transaction }) => {
         width: "90%",
         marginBottom: 16,
       }}
+      overshootRight={false}
+      renderRightActions={() => <RightAction />}
     >
       <View className="h-[140] bg-background-tertiary rounded-[6] p-6">
         <Text className="text-white text-base">{transaction.description}</Text>
