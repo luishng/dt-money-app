@@ -5,6 +5,7 @@ import {
   GetTrasactionResponse,
 } from "@/shared/interfaces/https/get-trasaction-request";
 import { TransactionCategory } from "@/shared/interfaces/https/transaction-category";
+import { UpdateTransactionInterface } from "@/shared/interfaces/https/update-transaction-request";
 import qs from "qs";
 export const getTransactionCategories = async (): Promise<
   TransactionCategory[]
@@ -40,4 +41,10 @@ export const getTrasactions = async (
 
 export const deleteTransaction = async (id: number) => {
   await dtMoneyApi.delete(`/transaction/${id}`);
+};
+
+export const updateTransaction = async (
+  transaction: UpdateTransactionInterface
+) => {
+  await dtMoneyApi.put(`/transaction`, transaction);
 };
