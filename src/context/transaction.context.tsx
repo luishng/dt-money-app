@@ -4,6 +4,7 @@ import {
   PropsWithChildren,
   useCallback,
   useContext,
+  useMemo,
   useState,
 } from "react";
 import * as transactionService from "@/shared/services/dt-money/transaction.service";
@@ -16,6 +17,13 @@ import {
   Filters,
   Pagination,
 } from "@/shared/interfaces/https/get-trasaction-request";
+
+const filtersInitialValues = {
+  categoryIds: {},
+  typeId: undefined,
+  from: undefined,
+  to: undefined,
+};
 
 interface FetchTransactionParams {
   page: number;
@@ -55,6 +63,7 @@ export type TransactionContextType = {
   filters: Filters;
   handleFilters: (params: HandleFiltersParams) => void;
   handleCategoryFilter: (categoryId: number) => void;
+  resetFilters: () => void;
 };
 
 export const TransactionContext = createContext({} as TransactionContextType);
@@ -65,12 +74,7 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
   const [categories, setCategories] = useState<TransactionCategory[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [filters, setFilters] = useState<Filters>({
-    categoryIds: {},
-    typeId: undefined,
-    from: undefined,
-    to: undefined,
-  });
+  const [filters, setFilters] = useState<Filters>(filtersInitialValues);
 
   const [loadings, setLoadings] = useState({
     initial: false,
@@ -92,6 +96,14 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
     totalPages: 0,
   });
 
+  const categoryIds = useMemo(
+    () =>
+      Object.entries(filters.categoryIds)
+        .filter(([key, value]) => value)
+        .map(([key]) => Number(key)),
+    [filters.categoryIds]
+  );
+
   const handleLoadings = ({ key, value }: HandleLoadingParams) =>
     setLoadings((prevValue) => ({ ...prevValue, [key]: value }));
 
@@ -100,6 +112,8 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
     const transactionsResponse = await transactionService.getTrasactions({
       page: 1,
       perPage: page * perPage,
+      ...filters,
+      categoryIds,
     });
     setTransactions(transactionsResponse.data);
     setTotalTransactions(transactionsResponse.totalTransactions);
@@ -109,7 +123,7 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
       totalPages: transactionsResponse.totalPages,
       totalRows: transactionsResponse.totalRows,
     });
-  }, [pagination]);
+  }, [pagination, filters, categoryIds]);
 
   const fetchCategories = async () => {
     const categoriesResponse =
@@ -133,6 +147,8 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
         page,
         perPage: pagination.perPage,
         searchText,
+        ...filters,
+        categoryIds,
       });
 
       if (page === 1) {
@@ -151,7 +167,7 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
         totalPages: transactionsResponse.totalPages,
       });
     },
-    [pagination, searchText]
+    [pagination, searchText, filters, categoryIds]
   );
 
   const loadMoreTransactions = useCallback(async () => {
@@ -173,6 +189,27 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
     }));
   };
 
+  const resetFilters = useCallback(async () => {
+    setFilters(filtersInitialValues);
+    setSearchText("");
+
+    const transactionsResponse = await transactionService.getTrasactions({
+      page: 1,
+      perPage: pagination.perPage,
+      searchText: "",
+      categoryIds: [],
+    });
+
+    setTransactions(transactionsResponse.data);
+    setTotalTransactions(transactionsResponse.totalTransactions);
+    setPagination({
+      ...pagination,
+      page: 1,
+      totalPages: transactionsResponse.totalPages,
+      totalRows: transactionsResponse.totalRows,
+    });
+  }, []);
+
   return (
     <TransactionContext.Provider
       value={{
@@ -193,6 +230,7 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
         filters,
         handleFilters,
         handleCategoryFilter,
+        resetFilters,
       }}
     >
       {children}

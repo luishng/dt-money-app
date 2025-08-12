@@ -27,7 +27,7 @@ export const LeftAction: FC<Params> = ({ transaction }) => {
         activeOpacity={0.8}
         className="h-[140] bg-accent-blue-dark w-[80] rounded-l-[6] items-center justify-center"
         onPress={() =>
-          openBottomSheet(<EditTransactionForm transaction={transaction} />, 1)
+          openBottomSheet(<EditTransactionForm transaction={transaction} />, 0)
         }
       >
         <MaterialIcons name="edit" color={colors.white} size={30} />
